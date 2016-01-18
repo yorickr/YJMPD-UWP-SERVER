@@ -14,7 +14,7 @@ public class Server {
 
     ServerSocket serverSocket;
 
-    private ArrayList<Socket> activeConnections;
+    private ArrayList<ConnectionHandler> activeConnections;
 
     public Server() {
         try {
@@ -26,12 +26,20 @@ public class Server {
 
     }
 
+    public void sendToAllClients(boolean binary, Object content) {
+        activeConnections.forEach(client -> {
+            client.handleCommand(binary, content);
+        });
+    }
+
     public void handleConnections() {
         while (true) {
             try {
                 Socket s = serverSocket.accept();
-                activeConnections.add(s);
-                new ConnectionHandler(this, s).start();
+                ConnectionHandler ch = new ConnectionHandler(this, s);
+                activeConnections.add(ch);
+                ch.start();
+                System.out.println("Accepted new connection: " + s.getInetAddress());
             } catch (IOException e) {
                 e.printStackTrace();
             }
