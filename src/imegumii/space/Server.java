@@ -14,7 +14,7 @@ public class Server {
 
     ServerSocket serverSocket;
 
-    private ArrayList<ConnectionHandler> activeConnections;
+    private ArrayList<Connection> activeConnections;
 
     public Server() {
         try {
@@ -24,10 +24,33 @@ public class Server {
             e.printStackTrace();
         }
 
+        //Timer thread to check if enough players available
+        new Thread(()->
+        {
+            while(true)
+            {
+                if(activeConnections.size() >= 3)
+                {
+                    System.out.println("Enough players connected to begin match");
+                    new Match(activeConnections).start();
+                    activeConnections.clear();
+                }
+                try {
+                    Thread.sleep(500);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
+
     }
 
-    public void removeClient(ConnectionHandler c)
+    public void addClient(Connection c)
     {
+        activeConnections.add(c);
+    }
+
+    public void removeClient(Connection c) {
         activeConnections.remove(c);
     }
 
@@ -41,9 +64,8 @@ public class Server {
         while (true) {
             try {
                 Socket s = serverSocket.accept();
-                ConnectionHandler ch = new ConnectionHandler(this, s);
-                activeConnections.add(ch);
-                ch.start();
+                Connection c = new Connection(this, s);
+                c.start();
                 System.out.println("Accepted new connection: " + s.getInetAddress());
             } catch (IOException e) {
                 e.printStackTrace();
