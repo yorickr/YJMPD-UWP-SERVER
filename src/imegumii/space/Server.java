@@ -26,6 +26,11 @@ public class Server {
 
     }
 
+    public void removeClient(ConnectionHandler c)
+    {
+        activeConnections.remove(c);
+    }
+
     public void sendToAllClients(boolean binary, Object content) {
         activeConnections.forEach(client -> {
             client.handleCommand(binary, content);

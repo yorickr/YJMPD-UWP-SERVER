@@ -60,12 +60,14 @@ public class ConnectionHandler extends Thread {
                         lines.close();
                         bw.close();
                         socket.close();
+                        server.removeClient(this);
                         isDone = true;
                         break;
                 }
             }
         } catch (Exception e) {
             e.printStackTrace();
+            server.removeClient(this);
         }
 
     }
