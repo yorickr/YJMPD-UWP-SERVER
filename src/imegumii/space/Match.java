@@ -25,6 +25,12 @@ public class Match extends Thread{
     public Match(ArrayList<Connection> list) {
         System.out.println("Starting match");
         this.participants = new ArrayList<>(list);
+        participants.forEach(p -> p.setMatch(this));
+    }
+
+    public void sendMessageToAllClients(String s)
+    {
+        sendToAllClients(false, s + Main.NEWLINE);
     }
 
     @Override
@@ -70,7 +76,7 @@ public class Match extends Thread{
 
     private void pickSelected()
     {
-        Connection c = participants.get((int) (Math.random() * participants.size()));
+        Connection c = participants.get((int) (Math.random() * (participants.size())));
         selectedParticipant = c;
     }
 

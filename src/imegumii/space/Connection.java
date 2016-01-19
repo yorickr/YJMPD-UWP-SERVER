@@ -13,9 +13,15 @@ public class Connection extends Thread {
 
     private Socket socket;
     private Server server;
+    private Match match;
+
     private String name;
     private BufferedReader br;
     private BufferedWriter bw;
+
+    private double lon;
+    private double lat;
+
     public Connection(Server server, Socket s) {
         socket = s;
         this.server = server;
@@ -25,6 +31,10 @@ public class Connection extends Thread {
     public void run() {
         System.out.println("Starting thread: " + socket.getInetAddress());
         handleConnection();
+    }
+
+    public void setMatch(Match match) {
+        this.match = match;
     }
 
     public void handleCommand(boolean binary, Object content) {
@@ -76,12 +86,23 @@ public class Connection extends Thread {
                         case Name:
                             //Received name from client
                             this.name = o.getString("name");
+                            this.lon = o.getDouble("lon");
+                            this.lat = o.getDouble("lat");
                             tempObj = new JSONObject();
                             tempObj.put("command", Commands.Msg.toString());
                             tempObj.put(Commands.Msg.toString(), "ok");
                             sendJSONMessage(tempObj);
                             server.addClient(this);
                             break;
+                        case PlayerRemoved:
+                            server.removeClient(this);
+                            break;
+                        case PictureUrl:
+                            if (match != null) {
+                                match.sendMessageToAllClients(o.getString(Commands.PictureUrl.toString()));
+                            }
+                            break;
+
                     }
                 } catch (JSONException e) {
                     e.printStackTrace();
@@ -114,7 +135,8 @@ public class Connection extends Thread {
         Name,
         Msg,
         Picture,
-        GameFound,
-        PlayerJoined
+        PlayerJoined,
+        PlayerRemoved,
+        PictureUrl
     }
 }

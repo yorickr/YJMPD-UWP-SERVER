@@ -46,20 +46,38 @@ public class Server {
     }
 
     public void addClient(Connection c) {
-        //Add to list and notify other players
+        //Add to list and notify all players
         activeConnections.add(c);
         JSONObject o = new JSONObject();
         o.put("command", Connection.Commands.PlayerJoined.toString());
-        o.put(Connection.Commands.PlayerJoined.toString(), c.getPlayerName());
+        //Newly connected player joined sent to everyone
         activeConnections.forEach(client ->
         {
+            JSONObject temp = o;
+            temp.put(Connection.Commands.PlayerJoined.toString(), c.getPlayerName());
             client.sendJSONMessage(o);
+        });
 
+        activeConnections.forEach(client ->
+        {
+            if (!c.getPlayerName().equals(client.getPlayerName())) {
+                JSONObject tempval = o;
+                tempval.put(Connection.Commands.PlayerJoined.toString(),client.getPlayerName());
+                c.sendJSONMessage(tempval);
+            }
         });
     }
 
     public void removeClient(Connection c) {
         activeConnections.remove(c);
+        JSONObject o = new JSONObject();
+        o.put("command", Connection.Commands.PlayerRemoved.toString());
+        o.put(Connection.Commands.PlayerRemoved.toString(), c.getPlayerName());
+        activeConnections.forEach(client ->
+        {
+            client.sendJSONMessage(o);
+        });
+
     }
 
     public void sendToAllClients(boolean binary, Object content) {
