@@ -40,7 +40,17 @@ public class Match extends Thread{
                 //Tell selected player to take a picture
                 JSONObject o = new JSONObject();
                 o.put("command", Connection.Commands.Picture.toString());
-                selectedParticipant.sendJSONMessage(o);
+                participants.forEach(p ->{
+                    JSONObject temp = o;
+                    if (p == selectedParticipant) {
+                        temp.put("selected", true);
+                    }
+                    else
+                    {
+                        temp.put("selected", false);
+                    }
+                    p.sendJSONMessage(temp);
+                });
                 currentState = State.Waiting;
             }
             if (currentState == State.Stopped) {
@@ -60,10 +70,7 @@ public class Match extends Thread{
 
     private void pickSelected()
     {
-        JSONObject o = new JSONObject();
-        o.put("selected", true);
         Connection c = participants.get((int) (Math.random() * participants.size()));
-        c.sendJSONMessage(o);
         selectedParticipant = c;
     }
 

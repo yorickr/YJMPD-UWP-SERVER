@@ -1,5 +1,7 @@
 package imegumii.space;
 
+import org.json.JSONObject;
+
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -25,12 +27,10 @@ public class Server {
         }
 
         //Timer thread to check if enough players available
-        new Thread(()->
+        new Thread(() ->
         {
-            while(true)
-            {
-                if(activeConnections.size() >= 3)
-                {
+            while (true) {
+                if (activeConnections.size() >= 3) {
                     System.out.println("Enough players connected to begin match");
                     new Match(activeConnections).start();
                     activeConnections.clear();
@@ -45,9 +45,17 @@ public class Server {
 
     }
 
-    public void addClient(Connection c)
-    {
+    public void addClient(Connection c) {
+        //Add to list and notify other players
         activeConnections.add(c);
+        JSONObject o = new JSONObject();
+        o.put("command", Connection.Commands.PlayerJoined.toString());
+        o.put(Connection.Commands.PlayerJoined.toString(), c.getPlayerName());
+        activeConnections.forEach(client ->
+        {
+            client.sendJSONMessage(o);
+
+        });
     }
 
     public void removeClient(Connection c) {

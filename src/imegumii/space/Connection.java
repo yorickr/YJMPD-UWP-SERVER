@@ -11,21 +11,11 @@ import java.net.Socket;
  */
 public class Connection extends Thread {
 
-    public enum Commands
-    {
-        Hi,
-        Name,
-        Picture
-    }
-
     private Socket socket;
     private Server server;
-
     private String name;
-
     private BufferedReader br;
     private BufferedWriter bw;
-
     public Connection(Server server, Socket s) {
         socket = s;
         this.server = server;
@@ -54,6 +44,7 @@ public class Connection extends Thread {
     }
 
     public void sendJSONMessage(JSONObject message) {
+        System.out.println("Sending: " + message.toString());
         handleCommand(false, message.toString() + Main.NEWLINE);
     }
 
@@ -78,14 +69,16 @@ public class Connection extends Thread {
                         case Hi:
                             //succesful connection
                             tempObj = new JSONObject();
-                            tempObj.put("msg", "hi there");
+                            tempObj.put("command", Commands.Msg.toString());
+                            tempObj.put(Commands.Msg.toString(), "hi there");
                             sendJSONMessage(tempObj);
                             break;
                         case Name:
                             //Received name from client
                             this.name = o.getString("name");
                             tempObj = new JSONObject();
-                            tempObj.put("msg", "ok");
+                            tempObj.put("command", Commands.Msg.toString());
+                            tempObj.put(Commands.Msg.toString(), "ok");
                             sendJSONMessage(tempObj);
                             server.addClient(this);
                             break;
@@ -114,5 +107,14 @@ public class Connection extends Thread {
 
     public String getPlayerName() {
         return name;
+    }
+
+    public enum Commands {
+        Hi,
+        Name,
+        Msg,
+        Picture,
+        GameFound,
+        PlayerJoined
     }
 }
