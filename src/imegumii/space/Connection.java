@@ -100,6 +100,7 @@ public class Connection extends Thread {
                         case PictureUrl:
                             if (match != null) {
                                 match.sendMessageToAllClients(o.getString(Commands.PictureUrl.toString()));
+                                match.pictureTaken();
                             }
                             break;
 

@@ -33,6 +33,11 @@ public class Match extends Thread{
         sendToAllClients(false, s + Main.NEWLINE);
     }
 
+    public void pictureTaken()
+    {
+        currentState = State.Running;
+    }
+
     @Override
     public void run() {
         //handle game logic
