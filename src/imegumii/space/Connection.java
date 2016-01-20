@@ -22,9 +22,35 @@ public class Connection extends Thread {
     private double lon;
     private double lat;
 
+    private double points;
+    private double pointstotal;
+
     public Connection(Server server, Socket s) {
         socket = s;
         this.server = server;
+        points = 0;
+        pointstotal = 0;
+    }
+
+    @Override
+    public String toString() {
+        return "hallo";
+    }
+
+    public double getPointstotal() {
+        return pointstotal;
+    }
+
+    public void setPointstotal(double pointstotal) {
+        this.pointstotal = pointstotal;
+    }
+
+    public double getPoints() {
+        return points;
+    }
+
+    public void setPoints(double points) {
+        this.points = points;
     }
 
     @Override
@@ -99,9 +125,17 @@ public class Connection extends Thread {
                             break;
                         case PictureUrl:
                             if (match != null) {
-                                match.sendMessageToAllClients(o.getString(Commands.PictureUrl.toString()));
+                                match.sendMessageToAllClients(readLine);
                                 match.pictureTaken();
                             }
+                            break;
+                        case DestinationReached:
+                            if (match != null) {
+                                match.matchWon(this);
+
+                            }
+                            break;
+                        case PlayerReady:
                             break;
 
                     }
@@ -138,6 +172,9 @@ public class Connection extends Thread {
         Picture,
         PlayerJoined,
         PlayerRemoved,
-        PictureUrl
+        PictureUrl,
+        DestinationReached,
+        GameEnded,
+        PlayerReady
     }
 }
