@@ -26,6 +26,9 @@ public class Match extends Thread{
         System.out.println("Starting match");
         this.participants = new ArrayList<>(list);
         participants.forEach(p -> p.setMatch(this));
+        //TODO, check why list comes in with only a single name
+        //TODO, GameEnded (winner : name) (players {points, pointstotal})
+        // TODO DestinationReached (username), PlayerReady (ready : true)
     }
 
     public void sendMessageToAllClients(String s)
