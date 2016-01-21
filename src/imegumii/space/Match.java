@@ -3,6 +3,7 @@ package imegumii.space;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * Created by imegumii on 1/18/16.
@@ -31,6 +32,9 @@ public class Match extends Thread{
         //TODO, check why list comes in with only a single name
         //TODO, GameEnded (winner : name) (players {points, pointstotal})
         // TODO DestinationReached (username), PlayerReady (ready : true)
+        System.out.println(participants.get(0).getPlayerName());
+        matchWon(participants.get(0));
+
     }
 
     public void sendMessageToAllClients(String s)
@@ -47,7 +51,17 @@ public class Match extends Thread{
         //Game won, send GameEnded
         JSONObject o = new JSONObject();
         o.put("command", Connection.Commands.GameEnded.toString());
-        
+        o.put("winner", c.getPlayerName());
+        HashMap<String, HashMap<String, Double>> hashMapHashMap = new HashMap<>();
+        HashMap<String, Double> hm;
+        for (Connection x : participants) {
+            hm = new HashMap<>();
+            hm.put("points", x.getPoints());
+            hm.put("pointstotal", x.getPointstotal());
+            hashMapHashMap.put(x.getPlayerName(), hm);
+        }
+        o.put("players", hashMapHashMap);
+
 
     }
 
