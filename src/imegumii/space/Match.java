@@ -19,12 +19,16 @@ public class Match extends Thread {
         System.out.println("Starting match");
         this.participants = new ArrayList<>(list);
         participants.forEach(p -> p.setMatch(this));
-        // TODO PlayerReady (ready : true)
 
     }
 
     public void sendMessageToAllClients(String s) {
         sendToAllClients(false, s + Main.NEWLINE);
+    }
+
+    public void sendToAllClients(JSONObject o)
+    {
+        participants.forEach(p -> p.sendJSONMessage(o));
     }
 
     public void pictureTaken() {
@@ -46,27 +50,31 @@ public class Match extends Thread {
             hashMapHashMap.put(x.getPlayerName(), hm);
         }
         o.put("players", hashMapHashMap);
-        System.out.println(o);
         participants.forEach(p -> p.sendJSONMessage(o));
+        currentState = State.Stopped;
     }
 
     public void assignPoints(Connection winner)
     {
         participants.forEach(p->{
-            if (p == winner) {
+            if (p == winner && currentTime<300) {
                 //Appends to pointstotal and points
-                winner.addPoints(100);
+                winner.addPoints(300-currentTime);
             }
         });
+        if (winner == selectedParticipant) {
+            winner.addPoints(300);
+        }
     }
 
     @Override
     public void run() {
         //handle game logic
+        boolean notdone = true;
         pickSelected();
         currentState = State.Started;
         int kalcount = 0;
-        while (true) {
+        while (notdone) {
             //Keep alive ping
             if(kalcount > 30){
                 participants.forEach(c ->
@@ -110,24 +118,42 @@ public class Match extends Thread {
                 //Game ended, bubay
                 System.out.println("Game took: " + currentTime + " seconds");
                 //Wait for gameready from clients
-                final int[] i = {0};
-                participants.forEach(p -> {
+                int i = 0;
+                for (Connection p : participants) {
                     if (p.isReady()) {
-                        i[0]++;
+                        i++;
                     }
-                    if (i[0] >= participants.size()) {
+                    System.out.println(i + " : " + participants.size());
+                    if (i  >= participants.size()) {
                         //start new game
                         pickSelected();
                         currentState = State.Started;
                         currentTime = 0;
-                        participants.forEach(c->{c.clearPoints();c.setReady(false);});
+                        participants.forEach(c -> {
+                            c.clearPoints();
+                            c.setReady(false);
+                        });
+
+                        new Thread(()->{
+                            try {
+                                Thread.sleep(10000);
+                                currentState = State.Finished;
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+                        }).start();
+
                     }
-                });
+                }
                 try {
                     Thread.sleep(200);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
+            }
+            if (currentState == State.Finished) {
+                notdone = false;
+                break;
             }
             if (currentState == State.Waiting) {
                 //Waiting, sleep in order to preserve CPU cycles.
@@ -163,6 +189,7 @@ public class Match extends Thread {
         Running,
         Stopped,
         Started,
-        Waiting
+        Waiting,
+        Finished
     }
 }

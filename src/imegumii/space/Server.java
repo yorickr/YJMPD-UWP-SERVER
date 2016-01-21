@@ -31,8 +31,7 @@ public class Server {
         {
             int i = 0;
             while (true) {
-                if(i > 30)
-                {
+                if (i > 30) {
                     activeConnections.forEach(c ->
                     {
                         c.sendJSONMessage(new JSONObject().put("command", Connection.Commands.Hi.toString()));
@@ -73,7 +72,7 @@ public class Server {
         {
             if (!c.getPlayerName().equals(client.getPlayerName())) {
                 JSONObject tempval = o;
-                tempval.put(Connection.Commands.PlayerJoined.toString(),client.getPlayerName());
+                tempval.put(Connection.Commands.PlayerJoined.toString(), client.getPlayerName());
                 c.sendJSONMessage(tempval);
             }
         });
@@ -84,10 +83,13 @@ public class Server {
         JSONObject o = new JSONObject();
         o.put("command", Connection.Commands.PlayerRemoved.toString());
         o.put(Connection.Commands.PlayerRemoved.toString(), c.getPlayerName());
-        activeConnections.forEach(client ->
-        {
-            client.sendJSONMessage(o);
-        });
+        if (c.getPlayerName() != null) {
+            activeConnections.forEach(client ->
+            {
+                client.sendJSONMessage(o);
+            });
+        }
+
 
     }
 

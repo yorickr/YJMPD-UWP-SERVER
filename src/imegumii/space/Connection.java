@@ -28,6 +28,8 @@ public class Connection extends Thread {
 
     private boolean ready;
 
+    private boolean running = true;
+
     public Connection(Server server, Socket s) {
         socket = s;
         try {
@@ -96,8 +98,16 @@ public class Connection extends Thread {
             try {
                 bw.write((String) content);
                 bw.flush();
-            } catch (Exception e) {
+            } catch (java.net.SocketException e) {
                 e.printStackTrace();
+                try {
+                    bw.close();
+                } catch (IOException e1) {
+                    e1.printStackTrace();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+                running = false;
             }
         }
     }
@@ -115,7 +125,7 @@ public class Connection extends Thread {
         try {
             br = new BufferedReader(new InputStreamReader(socket.getInputStream(), "UTF-8"));
             bw = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream(), "UTF-8"));
-            while (!isDone) {
+            while (!isDone && running) {
                 String readLine = br.readLine();
                 System.out.println("Received line: " + readLine);
 
@@ -141,6 +151,10 @@ public class Connection extends Thread {
                             server.addClient(this);
                             break;
                         case PlayerRemoved:
+                            if(match != null)
+                            {
+                                match.sendToAllClients(new JSONObject().put("command", Commands.StopGame.toString()));
+                            }
                             server.removeClient(this);
                             break;
                         case PictureUrl:
@@ -180,7 +194,11 @@ public class Connection extends Thread {
             }
         } catch (Exception e) {
             e.printStackTrace();
-            server.removeClient(this);
+            if (!(e instanceof NullPointerException)) {
+
+                server.removeClient(this);
+
+            }
         }
 
     }
@@ -199,6 +217,7 @@ public class Connection extends Thread {
         PictureUrl,
         DestinationReached,
         GameEnded,
-        PlayerReady
+        PlayerReady,
+        StopGame
     }
 }
