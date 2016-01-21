@@ -5,6 +5,7 @@ import org.json.JSONObject;
 
 import java.io.*;
 import java.net.Socket;
+import java.net.SocketException;
 
 /**
  * Created by imegumii on 1/18/16.
@@ -25,8 +26,16 @@ public class Connection extends Thread {
     private double points;
     private double pointstotal;
 
+    private boolean ready;
+
     public Connection(Server server, Socket s) {
         socket = s;
+        try {
+            socket.setSoTimeout(100000);
+            socket.setKeepAlive(true);
+        } catch (SocketException e) {
+            e.printStackTrace();
+        }
         this.server = server;
         points = 0;
         pointstotal = 0;
@@ -34,7 +43,15 @@ public class Connection extends Thread {
 
     @Override
     public String toString() {
-        return "hallo";
+        return name;
+    }
+
+    public boolean isReady() {
+        return ready;
+    }
+
+    public void setReady(boolean ready) {
+        this.ready = ready;
     }
 
     public double getPointstotal() {
@@ -49,8 +66,14 @@ public class Connection extends Thread {
         return points;
     }
 
-    public void setPoints(double points) {
-        this.points = points;
+    public void clearPoints()
+    {
+        this.points = 0;
+    }
+
+    public void addPoints(double points) {
+        this.points += points;
+        this.pointstotal += points;
     }
 
     @Override
@@ -136,6 +159,10 @@ public class Connection extends Thread {
                             }
                             break;
                         case PlayerReady:
+                            if (o.getBoolean("ready")) {
+                                //player is ready
+                                ready = true;
+                            }
                             break;
 
                     }
