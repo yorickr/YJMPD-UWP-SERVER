@@ -65,7 +65,18 @@ public class Match extends Thread {
         //handle game logic
         pickSelected();
         currentState = State.Started;
+        int kalcount = 0;
         while (true) {
+            //Keep alive ping
+            if(kalcount > 30){
+                participants.forEach(c ->
+                {
+                    c.sendJSONMessage(new JSONObject().put("command", Connection.Commands.Hi.toString()));
+                });
+                kalcount = 0;
+            }
+            kalcount++;
+
             if (currentState == State.Running) {
                 //Game running
                 try {

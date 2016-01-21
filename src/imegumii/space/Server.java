@@ -29,7 +29,17 @@ public class Server {
         //Timer thread to check if enough players available
         new Thread(() ->
         {
+            int i = 0;
             while (true) {
+                if(i > 30)
+                {
+                    activeConnections.forEach(c ->
+                    {
+                        c.sendJSONMessage(new JSONObject().put("command", Connection.Commands.Hi.toString()));
+                    });
+                    i = 0;
+                }
+
                 if (activeConnections.size() >= 3) {
                     System.out.println("Enough players connected to begin match");
                     new Match(activeConnections).start();
@@ -40,6 +50,7 @@ public class Server {
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
+                i++;
             }
         }).start();
 

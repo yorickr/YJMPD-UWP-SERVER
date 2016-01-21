@@ -126,11 +126,8 @@ public class Connection extends Thread {
                     System.out.println(Commands.valueOf(s));
                     switch (Commands.valueOf(s)) {
                         case Hi:
-                            //succesful connection
-                            tempObj = new JSONObject();
-                            tempObj.put("command", Commands.Msg.toString());
-                            tempObj.put(Commands.Msg.toString(), "hi there");
-                            sendJSONMessage(tempObj);
+                            //Keep alive ping
+                            System.out.println("Ping received from " + socket.getInetAddress() + "!");
                             break;
                         case Name:
                             //Received name from client
