@@ -22,6 +22,8 @@ public class Match extends Thread{
 
     private Connection selectedParticipant;
 
+    private int currentTime = 0;
+
     public Match(ArrayList<Connection> list) {
         System.out.println("Starting match");
         this.participants = new ArrayList<>(list);
@@ -41,6 +43,14 @@ public class Match extends Thread{
         currentState = State.Running;
     }
 
+    public void matchWon(Connection c){
+        //Game won, send GameEnded
+        JSONObject o = new JSONObject();
+        o.put("command", Connection.Commands.GameEnded.toString());
+        
+
+    }
+
     @Override
     public void run() {
         //handle game logic
@@ -49,6 +59,14 @@ public class Match extends Thread{
         while (true) {
             if (currentState == State.Running) {
                 //Game running
+                try {
+                    Thread.sleep(1000);
+
+                    currentTime++;
+
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
             if (currentState == State.Started) {
                 //Tell selected player to take a picture
