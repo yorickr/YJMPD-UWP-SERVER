@@ -61,8 +61,8 @@ public class Match extends Thread{
             hashMapHashMap.put(x.getPlayerName(), hm);
         }
         o.put("players", hashMapHashMap);
-
-
+        System.out.println(o);
+        participants.forEach(p -> p.sendJSONMessage(o));
     }
 
     @Override
@@ -118,6 +118,13 @@ public class Match extends Thread{
     {
         Connection c = participants.get((int) (Math.random() * (participants.size())));
         selectedParticipant = c;
+
+        //TODO, remove preference for kennyboy55
+        participants.forEach(p->{
+            if (p.getPlayerName().equals("kennyboy55")) {
+                selectedParticipant = p;
+            }
+        });
     }
 
     public void sendToAllClients(boolean binary, Object content) {
